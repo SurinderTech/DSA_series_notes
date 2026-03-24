@@ -119,7 +119,7 @@ Feel free to fork the repository and submit a pull request.
 
 ## ⭐ Support
 
-If you find this repository helpful, please consider giving it a **star ⭐**.
+If you find this repository helpful, please consider giving it a **star ⭐**
 
 ---
 
