@@ -106,7 +106,8 @@ DSA-Series
 [✔] Sorting
 [ ] Graphs
 [ ] Dynamic Programming
-| | [Linked List]
+
+ [Linked List]
 ```
 
 ---
