@@ -1,0 +1,669 @@
+{
+  "name": "AI Opportunity Monitoring Agent",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fetch_sent_log",
+      "name": "Fetch Sent Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sent_Log"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_ME",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Reads previously-notified opportunities. Create a 'Sent_Log' tab with header row: Key | Title | Source | URL | Date"
+    },
+    {
+      "id": "load_sources",
+      "name": "Load Source Registry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Auto-generated from opportunity_monitoring_sources.xlsx (170 sources)\nconst SOURCES = [{\"name\": \"IIT Ropar\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.iitrpr.ac.in/notices\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"NIT Jalandhar\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.nitj.ac.in/notices\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"IKG Punjab Technical University (PTU)\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.ptu.ac.in/notice\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Chandigarh University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.cuchd.in/placements\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Chitkara University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.chitkara.edu.in/placements\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Lovely Professional University (LPU)\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.lpu.in/placements\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Panjab University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://puchd.ac.in/notifications.php\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Thapar Institute (TIET)\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.thapar.edu/placements\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Guru Nanak Dev University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://gndu.ac.in/notification.aspx\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Punjabi University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.punjabiuniversity.ac.in/notifications\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Central University of Punjab\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.cup.edu.in/notifications\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"IIIT Una\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.iiitu.ac.in/notices\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"PEC (Punjab Engineering College)\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://pec.ac.in/notices\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"DAV University\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://davuniversity.org/placement\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"CGC Landran\", \"category\": \"A. Punjab Colleges & Universities\", \"url\": \"https://www.cgc.edu.in/placements\", \"keywords\": \"internship,placement,recruitment,hackathon,notice\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"ISRO\", \"category\": \"B. Government / Research\", \"url\": \"https://www.isro.gov.in/Careers.html\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"DRDO\", \"category\": \"B. Government / Research\", \"url\": \"https://rac.gov.in\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"BARC\", \"category\": \"B. Government / Research\", \"url\": \"https://www.barc.gov.in/careers/\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"BEL (Bharat Electronics)\", \"category\": \"B. Government / Research\", \"url\": \"https://bel-india.in/careers\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"C-DAC\", \"category\": \"B. Government / Research\", \"url\": \"https://www.cdac.in/index.aspx?id=career\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"NIC (National Informatics Centre)\", \"category\": \"B. Government / Research\", \"url\": \"https://www.nic.in/vacancies/\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"AICTE\", \"category\": \"B. Government / Research\", \"url\": \"https://www.aicte-india.org/opportunities\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"DST (Dept. of Science & Technology)\", \"category\": \"B. Government / Research\", \"url\": \"https://dst.gov.in/call-for-proposal\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"CSIR\", \"category\": \"B. Government / Research\", \"url\": \"https://www.csir.res.in/recruitment\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Ministry of Education\", \"category\": \"B. Government / Research\", \"url\": \"https://www.education.gov.in/notifications\", \"keywords\": \"recruitment,notification,advertisement no,vacancy,internship\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Google\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.google.com/jobs/results/\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Microsoft\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.microsoft.com/v2/global/en/home.html\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Amazon\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.amazon.jobs\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Apple\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://jobs.apple.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Meta\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.metacareers.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"NVIDIA\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Adobe\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.adobe.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Intel\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://jobs.intel.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Oracle\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.oracle.com/careers/\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"IBM\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.ibm.com/careers\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Salesforce\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.salesforce.com/company/careers/\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Cisco\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://jobs.cisco.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Qualcomm\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://qualcomm.wd5.myworkdayjobs.com/External\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"AMD\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.amd.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Samsung Research India\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.samsung.com/in/careers/\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Uber\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.uber.com/careers/list/\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Airbnb\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.airbnb.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Atlassian\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.atlassian.com/company/careers\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"ServiceNow\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://careers.servicenow.com\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Databricks\", \"category\": \"C. Big Tech Companies\", \"url\": \"https://www.databricks.com/company/careers\", \"keywords\": \"software engineer,new grad,intern,India\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"OpenAI\", \"category\": \"D. AI Companies\", \"url\": \"https://openai.com/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Anthropic\", \"category\": \"D. AI Companies\", \"url\": \"https://www.anthropic.com/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Cohere\", \"category\": \"D. AI Companies\", \"url\": \"https://cohere.com/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Hugging Face\", \"category\": \"D. AI Companies\", \"url\": \"https://apply.workable.com/huggingface/\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Perplexity\", \"category\": \"D. AI Companies\", \"url\": \"https://www.perplexity.ai/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Mistral AI\", \"category\": \"D. AI Companies\", \"url\": \"https://mistral.ai/careers/\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"xAI\", \"category\": \"D. AI Companies\", \"url\": \"https://x.ai/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Scale AI\", \"category\": \"D. AI Companies\", \"url\": \"https://scale.com/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Together AI\", \"category\": \"D. AI Companies\", \"url\": \"https://www.together.ai/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"LangChain\", \"category\": \"D. AI Companies\", \"url\": \"https://www.langchain.com/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Pinecone\", \"category\": \"D. AI Companies\", \"url\": \"https://www.pinecone.io/careers/\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Weaviate\", \"category\": \"D. AI Companies\", \"url\": \"https://weaviate.io/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"ElevenLabs\", \"category\": \"D. AI Companies\", \"url\": \"https://elevenlabs.io/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"RunPod\", \"category\": \"D. AI Companies\", \"url\": \"https://www.runpod.io/careers\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Replicate\", \"category\": \"D. AI Companies\", \"url\": \"https://replicate.com/about\", \"keywords\": \"LLM,machine learning,research engineer,applied AI,intern\", \"ai_score\": 10, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Flipkart\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.flipkartcareers.com\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"PhonePe\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.phonepe.com/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Razorpay\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://razorpay.com/jobs/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Groww\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://groww.in/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Zerodha\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://zerodha.com/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Swiggy\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://careers.swiggy.com\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Zomato (Eternal)\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.zomato.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Meesho\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.meesho.io/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Dream11\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://about.dream11.com/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"CRED\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://careers.cred.club\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"InMobi\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.inmobi.com/company/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"BrowserStack\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.browserstack.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Postman\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.postman.com/company/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Freshworks\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.freshworks.com/company/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Zoho\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.zoho.com/careers.html\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"ShareChat\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://sharechat.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Ola\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.olacabs.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Delhivery\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.delhivery.com/careers/\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Unacademy\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://unacademy.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Urban Company\", \"category\": \"E. Indian Product Companies\", \"url\": \"https://www.urbancompany.com/careers\", \"keywords\": \"hiring,freshers,intern,software engineer\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Juspay\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://juspay.io/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Observe.AI\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.observe.ai/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Sigmoid\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.sigmoid.com/careers/\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Rippling India\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.rippling.com/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Cohesity\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.cohesity.com/careers/\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Nutanix\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.nutanix.com/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Tekion\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://tekion.com/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Harness\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.harness.io/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Glean\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://www.glean.com/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Hasura\", \"category\": \"F. Bangalore Companies\", \"url\": \"https://hasura.io/careers\", \"keywords\": \"software engineer,AI,India,hiring\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Net Solutions\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.netsolutions.com/careers/\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"IDS Infotech\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.idsil.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Sebiz Infotech\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.sebiz.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"SmartData Enterprises\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.smartdata.net/career/\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Debut Infotech\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.debutinfotech.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Grazitti Interactive\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.grazitti.com/careers/\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"FCS Software Solutions\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.fcsltd.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"SoftProdigy\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.softprodigy.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"ToXSL Technologies\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.toxsl.com/career.php\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Code Brew Labs\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.code-brew.com/careers/\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Trigma Innovations\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.trigma.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Tech Mahindra (Chandigarh)\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://careers.techmahindra.com\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Infosys Chandigarh\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.infosys.com/careers.html\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Edifecs\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.edifecs.com/careers/\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"HashStudioz Technologies\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.hashstudioz.com/career\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Evon Technologies\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.evontech.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"XenonStack\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.xenonstack.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"NetSmartz\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.netsmartz.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Finvasia\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.finvasia.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"OATI India\", \"category\": \"G. Chandigarh/Mohali/Panchkula Companies\", \"url\": \"https://www.oati.com/careers\", \"keywords\": \"hiring,walk-in,freshers,developer\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Webguruz Technologies\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://webguruz.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"W3Villa Technologies\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://w3villa.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"TechCentrica\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://techcentrica.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"RV Technologies\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://www.rvtechnologies.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Capanicus\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://capanicus.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Daksha Design\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://www.dakshadesign.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Webomaze\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://www.webomaze.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Logiciel Solutions\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://logicielsolutions.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"iTechnolabs\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://www.itechnolabs.ca/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"TechRBM\", \"category\": \"H. Jalandhar Companies\", \"url\": \"https://www.techrbm.com/careers\", \"keywords\": \"hiring,jobs,developer\", \"ai_score\": 2, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Internshala\", \"category\": \"I. Internship Platforms\", \"url\": \"https://internshala.com/internships\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"LinkedIn Jobs\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.linkedin.com/jobs/\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Wellfound (AngelList Talent)\", \"category\": \"I. Internship Platforms\", \"url\": \"https://wellfound.com/jobs\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Indeed\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.indeed.co.in\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Naukri.com\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.naukri.com\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Foundit (Monster India)\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.foundit.in\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Glassdoor\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.glassdoor.co.in/Job\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Y Combinator Jobs (Work at a Startup)\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.workatastartup.com\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Cutshort\", \"category\": \"I. Internship Platforms\", \"url\": \"https://cutshort.io/jobs\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Hirect\", \"category\": \"I. Internship Platforms\", \"url\": \"https://hirect.in\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Unstop (Dare2Compete)\", \"category\": \"I. Internship Platforms\", \"url\": \"https://unstop.com/internships\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Devfolio\", \"category\": \"I. Internship Platforms\", \"url\": \"https://devfolio.co/hackathons\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"HackerEarth\", \"category\": \"I. Internship Platforms\", \"url\": \"https://www.hackerearth.com/challenges/\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"MLH (Major League Hacking)\", \"category\": \"I. Internship Platforms\", \"url\": \"https://mlh.io/seasons\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"GitHub Jobs / community boards\", \"category\": \"I. Internship Platforms\", \"url\": \"https://github.com/topics/hacktoberfest\", \"keywords\": \"internship,fresher,remote,AI engineer\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"We Work Remotely\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://weworkremotely.com\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Remote OK\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://remoteok.com\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"FlexJobs\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://www.flexjobs.com\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Remote.co\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://remote.co\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Turing\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://www.turing.com\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Crossover\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://www.crossover.com\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Arc.dev\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://arc.dev\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Deel Careers\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://www.deel.com/careers\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"GitLab Careers\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://about.gitlab.com/jobs/\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Automattic Careers\", \"category\": \"J. Remote Job Boards\", \"url\": \"https://automattic.com/work-with-us/\", \"keywords\": \"remote,AI,full-stack,worldwide\", \"ai_score\": 6, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Google Summer of Code\", \"category\": \"K. Open Source Programs\", \"url\": \"https://summerofcode.withgoogle.com\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"GirlScript Summer of Code\", \"category\": \"K. Open Source Programs\", \"url\": \"https://gssoc.girlscript.tech\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Linux Foundation Mentorship\", \"category\": \"K. Open Source Programs\", \"url\": \"https://mentorship.lfx.linuxfoundation.org\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"CNCF Mentorship (LFX)\", \"category\": \"K. Open Source Programs\", \"url\": \"https://mentorship.lfx.linuxfoundation.org\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Outreachy\", \"category\": \"K. Open Source Programs\", \"url\": \"https://www.outreachy.org\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Google Season of Docs\", \"category\": \"K. Open Source Programs\", \"url\": \"https://developers.google.com/season-of-docs\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Hacktoberfest\", \"category\": \"K. Open Source Programs\", \"url\": \"https://hacktoberfest.com\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Major League Hacking (Fellowship)\", \"category\": \"K. Open Source Programs\", \"url\": \"https://mlh.io/fellowship\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Apache Software Foundation\", \"category\": \"K. Open Source Programs\", \"url\": \"https://www.apache.org\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Mozilla Open Source (MOSS)\", \"category\": \"K. Open Source Programs\", \"url\": \"https://www.mozilla.org/en-US/moss/\", \"keywords\": \"open source,mentorship,GSoC,contributor\", \"ai_score\": 4, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Devfolio\", \"category\": \"L. Hackathons\", \"url\": \"https://devfolio.co\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"Unstop\", \"category\": \"L. Hackathons\", \"url\": \"https://unstop.com/hackathons\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 1\", \"active\": true}, {\"name\": \"HackerEarth\", \"category\": \"L. Hackathons\", \"url\": \"https://www.hackerearth.com/challenges/hackathon/\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Devpost\", \"category\": \"L. Hackathons\", \"url\": \"https://devpost.com/hackathons\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Kaggle Competitions\", \"category\": \"L. Hackathons\", \"url\": \"https://www.kaggle.com/competitions\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"MLH\", \"category\": \"L. Hackathons\", \"url\": \"https://mlh.io/seasons\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Smart India Hackathon\", \"category\": \"L. Hackathons\", \"url\": \"https://sih.gov.in\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Hack2Skill\", \"category\": \"L. Hackathons\", \"url\": \"https://hack2skill.com\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"GeeksforGeeks Events\", \"category\": \"L. Hackathons\", \"url\": \"https://www.geeksforgeeks.org/events/\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Coding Ninjas Events\", \"category\": \"L. Hackathons\", \"url\": \"https://www.codingninjas.com/events\", \"keywords\": \"hackathon,AI track,prize,online/offline\", \"ai_score\": 5, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Superset\", \"category\": \"M. Placement & Career Portals\", \"url\": \"https://joinsuperset.com\", \"keywords\": \"campus placement,assessment,freshers\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"FirstNaukri\", \"category\": \"M. Placement & Career Portals\", \"url\": \"https://www.firstnaukri.com\", \"keywords\": \"campus placement,assessment,freshers\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"AMCAT\", \"category\": \"M. Placement & Career Portals\", \"url\": \"https://www.myamcat.com\", \"keywords\": \"campus placement,assessment,freshers\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"CoCubes\", \"category\": \"M. Placement & Career Portals\", \"url\": \"https://www.cocubes.com\", \"keywords\": \"campus placement,assessment,freshers\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}, {\"name\": \"Mercer | Mettl\", \"category\": \"M. Placement & Career Portals\", \"url\": \"https://mettl.com\", \"keywords\": \"campus placement,assessment,freshers\", \"ai_score\": 3, \"priority_tier\": \"Tier 2\", \"active\": true}];\n\n// Pull already-notified keys from the \"Fetch Sent Log\" node (runs once per execution)\nlet sentLogItems = [];\ntry {\n  sentLogItems = $('Fetch Sent Log').all();\n} catch (e) {\n  sentLogItems = [];\n}\n\nconst existingKeys = sentLogItems\n  .map(item => item.json.Key || item.json.key || '')\n  .filter(k => k);\n\nreturn SOURCES.map(source => ({\n  json: {\n    ...source,\n    existingKeys\n  }\n}));\n"
+      },
+      "notes": "Embeds all 170 sources from your spreadsheet. Edit the SOURCES array here to add/remove sites."
+    },
+    {
+      "id": "filter_active",
+      "name": "Filter Active Sources",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.active }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop",
+      "name": "Loop Over Sources",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        0
+      ],
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      }
+    },
+    {
+      "id": "firecrawl",
+      "name": "Scrape With Firecrawl",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        -120
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ url: $json.url, formats: [\"markdown\"], onlyMainContent: true, timeout: 15000 }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_ME",
+          "name": "Firecrawl API Key"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Header auth credential: name 'Authorization', value 'Bearer YOUR_FIRECRAWL_KEY'"
+    },
+    {
+      "id": "check_scrape",
+      "name": "Check Scrape Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1580,
+        -120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.success === true && $json.data && $json.data.markdown && $json.data.markdown.length > 50 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gemini",
+      "name": "Classify With Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1840,
+        -220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contents: [{ parts: [{ text: `You are an opportunity-monitoring assistant for Surinder, a developer interested in: AI, Software Engineering, Internships, Open Source, GSoC, Hackathons, and college/tech opportunities. Ignore MBA, Medical, Arts, and Sports content.\\n\\nRead the webpage content below (source: ${$json.name}, category: ${$json.category}, relevant keywords: ${$json.keywords}).\\n\\nOnly flag it as important if it contains a genuinely NEW opportunity: internship, hiring, registration, admissions, placement, scholarship, hackathon, event, deadline, AI role, software engineer role, recruitment, or exam notice.\\n\\nReturn ONLY a JSON object, no other text, in this exact shape:\\n{\\n  \"important\": true or false,\\n  \"type\": \"Internship | Job | Hackathon | Scholarship | Event | Admission | Other\",\\n  \"title\": \"short specific title of the opportunity\",\\n  \"deadline\": \"date if mentioned, else 'Not specified'\",\\n  \"summary\": \"1-2 sentence summary\",\\n  \"score\": a number 0-100 for how relevant this is to Surinder's interests\\n}\\n\\nIf nothing relevant is found, return {\"important\": false}.\\n\\nWebpage content:\\n${$json.data && $json.data.markdown ? $json.data.markdown.slice(0, 6000) : ''}\\n` }] }], generationConfig: { responseMimeType: 'application/json' } }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_ME",
+          "name": "Gemini API Key"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Header auth credential: name 'x-goog-api-key', value 'YOUR_GEMINI_KEY'"
+    },
+    {
+      "id": "parse_gemini",
+      "name": "Parse Gemini Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        -220
+      ],
+      "parameters": {
+        "jsCode": "// Parses Gemini's JSON output and merges it back with the original source item\nconst source = $('Loop Over Sources').item.json;\n\nlet parsed = { important: false };\ntry {\n  const raw = $json.candidates[0].content.parts[0].text;\n  const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  parsed = { important: false, parse_error: String(e) };\n}\n\nconst title = parsed.title || source.name;\nconst dedupeKey = `${title}|${source.url}`;\nconst isDuplicate = (source.existingKeys || []).includes(dedupeKey);\n\nreturn [{\n  json: {\n    source_name: source.name,\n    source_category: source.category,\n    source_url: source.url,\n    important: parsed.important === true,\n    type: parsed.type || 'Unknown',\n    title: title,\n    deadline: parsed.deadline || 'Not specified',\n    summary: parsed.summary || '',\n    score: parsed.score || source.ai_score || 5,\n    dedupeKey,\n    isDuplicate\n  }\n}];\n"
+      }
+    },
+    {
+      "id": "is_important",
+      "name": "Is Important",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2360,
+        -220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "i1",
+              "leftValue": "={{ $json.important === true && $json.score >= 70 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "is_new",
+      "name": "Is New",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2620,
+        -220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "n1",
+              "leftValue": "={{ $json.isDuplicate }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "telegram",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        -340
+      ],
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=\ud83d\udea8 *{{ $json.type }}*: {{ $json.title }}\\n\\n\ud83d\udccd Source: {{ $json.source_name }}\\n\ud83d\udcdd {{ $json.summary }}\\n\u23f0 Deadline: {{ $json.deadline }}\\n\u2b50 Score: {{ $json.score }}/100\\n\ud83d\udd17 {{ $json.source_url }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Telegram Bot"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "email",
+      "name": "Send Email Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2880,
+        -220
+      ],
+      "parameters": {
+        "fromEmail": "YOUR_FROM_EMAIL",
+        "toEmail": "YOUR_TO_EMAIL",
+        "subject": "=\ud83d\udea8 New {{ $json.type }}: {{ $json.title }}",
+        "emailFormat": "html",
+        "html": "=<h2>{{ $json.title }}</h2><p><b>Source:</b> {{ $json.source_name }}</p><p><b>Type:</b> {{ $json.type }}</p><p>{{ $json.summary }}</p><p><b>Deadline:</b> {{ $json.deadline }}</p><p><a href=\\\"{{ $json.source_url }}\\\">View source</a></p>",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_ME",
+          "name": "SMTP account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "whatsapp",
+      "name": "Send WhatsApp Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2880,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "whatsapp:+91YOUR_NUMBER"
+            },
+            {
+              "name": "Body",
+              "value": "=\ud83d\udea8 {{ $json.type }}: {{ $json.title }}\\n{{ $json.summary }}\\nDeadline: {{ $json.deadline }}\\n{{ $json.source_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_ME",
+          "name": "Twilio Basic Auth"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Basic auth = Twilio Account SID (username) + Auth Token (password). 'From' number is Twilio's WhatsApp sandbox number until you get one approved."
+    },
+    {
+      "id": "log_sheet",
+      "name": "Log To Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3140,
+        -220
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sent_Log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "={{ $json.dedupeKey }}",
+            "Title": "={{ $json.title }}",
+            "Source": "={{ $json.source_name }}",
+            "URL": "={{ $json.source_url }}",
+            "Date": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_ME",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "wait",
+      "name": "Wait Between Batches",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "amount": 2
+      }
+    },
+    {
+      "id": "done",
+      "name": "All Sources Processed",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        -400
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Fetch Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Sent Log": {
+      "main": [
+        [
+          {
+            "node": "Load Source Registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Source Registry": {
+      "main": [
+        [
+          {
+            "node": "Filter Active Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Active Sources": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Sources": {
+      "main": [
+        [
+          {
+            "node": "All Sources Processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scrape With Firecrawl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape With Firecrawl": {
+      "main": [
+        [
+          {
+            "node": "Check Scrape Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Scrape Success": {
+      "main": [
+        [
+          {
+            "node": "Classify With Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Between Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify With Gemini": {
+      "main": [
+        [
+          {
+            "node": "Parse Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gemini Response": {
+      "main": [
+        [
+          {
+            "node": "Is Important",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Important": {
+      "main": [
+        [
+          {
+            "node": "Is New",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Between Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Between Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Alert": {
+      "main": [
+        [
+          {
+            "node": "Send Email Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Alert": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Alert": {
+      "main": [
+        [
+          {
+            "node": "Log To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait Between Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Batches": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "opportunity-monitor"
+  }
+}
