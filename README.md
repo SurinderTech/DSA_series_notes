@@ -86,7 +86,7 @@ DSA-Series
 
 ---
 
-## 🚀 How to Use
+##  How to Use
 
 ```
 1. Pick a topic folder
