@@ -59,7 +59,7 @@ DSA-Series
 
 ---
 
-## 📖 Topics Covered
+##  Topics Covered
 
 | Category            | Concepts                              |
 | ------------------- | ------------------------------------- |
